@@ -1,0 +1,39 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: CD_deployment
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deployment_on_qa:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+        
+      - name: Create Posts Env file
+        working-directory: /
+        run: | 
+          touch .env
+          echo MONGO_URI=mongodb+srv://ashir:nirkhaabitk1234@cluster0.tt0wiwl.mongodb.net/post_db?retryWrites=true&w=majority >> .env
+          echo PORT=8080 >> .env
+          cat .env
+          
+      - name: Generate deployment package
+        run: |
+          zip -r deploy.zip . -x '*.git'
+          
+      - name: Deploy on elastic beanstalk QA env
+        uses: einaregilsson/beanstalk-deploy@v20
+        with: 
+          application_name: "ms-post-node"
+          environment_name: "Ms-post-node-env (terminated)"
+          version_label: "ver-${{ github.sha }}"
+          region: eu-north-1
+          deployment_package: deploy.zip
