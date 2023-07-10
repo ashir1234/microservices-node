@@ -23,6 +23,7 @@ mongoose.connect(mongoUri, {
 .then(() => console.log('mongodb connected'))
 .catch((err) => console.log(err))
 
+
 app.use('/', routes);
 
 app.listen(PORT, () => console.log(`listening to port ${PORT}`))
